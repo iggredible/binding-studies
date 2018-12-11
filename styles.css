@@ -1,0 +1,16 @@
+.input, .output{
+    width:      300px;
+    font:       12px monospace;
+    min-height: 3em;
+    padding:    10px;
+    border:     2px solid #eee;
+}
+
+.input:focus{
+    border: 2px solid red;
+}
+
+.output{
+    background: black;
+    color:      white;
+}

@@ -11,7 +11,7 @@
 const snackbar = document.getElementById("snackbar")
 
 
-
+/* Keyboard */
 const Keyboard = Object.freeze({
     final: Object.freeze({
         bind_proto: Object.freeze({
@@ -35,9 +35,17 @@ const Keyboard = Object.freeze({
     _mkbind: function(bind){
         let self = this;
 
+        // console.log(self.final.bind_proto)
+        // console.log('bind_proto^')
+        // console.log('bind:')
+        // console.log(bind)
+        // console.log(Object.seal({...self.final.bind_proto, ...bind}))
+        // console.log("Object.seal^")
         return Object.seal({...self.final.bind_proto, ...bind});
 	},
     _binding_filter: function(search){
+        // console.log(search)
+        // console.log('search^')
     	return bind => (
             bind.altKey  === search.altKey &&
             bind.ctrlKey === search.ctrlKey &&
@@ -46,9 +54,16 @@ const Keyboard = Object.freeze({
     },
     _binding_lookup: function(bind){
         let self = this;
+        // console.log(self.private.bindings)
+        // console.log('bindings^:')
+        // console.log('bind:')
+        // console.log(bind)
     	let result = self.private.bindings.find(self._binding_filter(bind));
         if(typeof result === "undefined")
             return null;
+
+        console.log('result:')
+        console.log(result)
         return result;
     },
     _ev_keydown: function(){
@@ -56,6 +71,18 @@ const Keyboard = Object.freeze({
 
         return function(ev){
             let result = self._binding_lookup(ev);
+            // this is triggered on EACH keydown
+            // By now, we already have all bindings registered
+            // Looks like when a key is pressed,
+            // it would look from our binding_list if the key pressed
+            // matches what we have on the bindings[] list
+
+            // console.log("TRIGGERED")
+            console.log(ev)
+            console.log('ev^')
+            // console.log('result:')
+            // console.log(JSON.stringify(self))
+            // console.log(result);
 
             if(result === null)
                 return;
@@ -72,6 +99,7 @@ const Keyboard = Object.freeze({
             ret = "ctrl-" + ret;
         if(binding.altKey)
             ret = "alt-" + ret;
+        // console.log('ret:' + ret)
         return ret;
     },
     _pad_left: function(text, width){
@@ -81,7 +109,7 @@ const Keyboard = Object.freeze({
     },
     attach: function(el){
         let self = this;
-    	self.private.ev_keydown_ptr = self._ev_keydown();
+    	  self.private.ev_keydown_ptr = self._ev_keydown();
         self.private.el = el;
         self.private.el.tabIndex = 0;
         self.private.el.addEventListener("keydown", self.private.ev_keydown_ptr);
@@ -95,11 +123,14 @@ const Keyboard = Object.freeze({
     },
     add_binding: function(bind){
     	let self = this;
-        let bind_proper = self._mkbind(bind);
+      let bind_proper = self._mkbind(bind);
     	let result = self._binding_lookup(bind_proper);
         if(result !== null)
             return false;
+        // console.log('bindings:')
         self.private.bindings.push(bind_proper);
+        // console.log(self.private.bindings)
+
         return true;
     },
     remove_binding: function(bind){
@@ -132,34 +163,41 @@ function log(msg){
     outputbox.innerHTML = msg;
 }
 
-function respondQ(){
-    console.log("You pressed Q");
-}
-function respondA(){
-    console.log("You pressed A");
-}
 Keyboard.attach(document.body);
 
 // Here's where the magic is...
 
 Keyboard.add_binding({
-    key: "Q",
-    desc: "Notify 'Q'",
+    key: "q",
+    desc: "Notify '^q'",
+    ctrlKey: true,
     callback: function(ev){
-        respondQ();
         snackbar.value = ``
         snackbar.style.visibility = `hidden`
     }
 });
 Keyboard.add_binding({
-    key: "A",
-    desc: "Notify 'A'",
+    key: "a",
+    ctrlKey: true,
+    desc: "Notify '^a'",
     callback: function(ev){
-        respondA();
         snackbar.style.visibility = 'visible'
         snackbar.focus()
     }
 });
+Keyboard.add_binding({
+    key: "Enter",
+    desc: "Press Enter",
+    callback: function(ev){
+        // what to do on enter?
+        // check if I am inside the input
+        // if I am, and if input has content
+        // submit
+        snackbar.value = ''
+        snackbar.style.visibility = 'hidden'
+        console.log("ENTER")
+    }
+})
 Keyboard.add_binding({
     key: "?",
     desc: "Print this help.",
@@ -179,6 +217,3 @@ Keyboard.add_binding({
  */
 
 // Keyboard.remove_binding({key: "d", ctrlKey: true});
-
-
-
